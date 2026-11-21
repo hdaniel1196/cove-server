@@ -3,6 +3,7 @@
 // come next. Everything here is plain Jellyfin API through /jf with the signed-in admin's token.
 import * as api from './api.js'
 import { h, icon, toast, sheet } from './ui.js'
+import { pairSheet } from './pair.js'
 import { usersInto, peopleCall, peopleLevelSheet, levelLabel, drawServices } from './people.js'
 
 const TABS = [['dashboard', 'Dashboard'], ['general', 'General'], ['users', 'Users'], ['requests', 'Requests'], ['libraries', 'Libraries'], ['devices', 'Devices'], ['livetv', 'Live TV'], ['playback', 'Playback'], ['transcoding', 'Transcoding'], ['plugins', 'Plugins'], ['tasks', 'Tasks'], ['activity', 'Activity'], ['logs', 'Logs'], ['backup', 'Backup'], ['network', 'Network']]
@@ -637,7 +638,7 @@ async function networkTab(body) {
         h('div.group-label', 'Addresses'),
         h('div.srv-card',
             ...addrRows(host, true),
-            api.role() === 'owner' ? h('div.srv-row', h('span'), h('button.pill.glass.small', { onclick: () => addressSheet(() => networkTab(body)) }, 'Change')) : ''),
+            h('div.srv-row', h('span'), h('span', h('button.pill.glass.small', { onclick: pairSheet }, 'Connect an app'), api.role() === 'owner' ? ' ' : '', api.role() === 'owner' ? h('button.pill.glass.small', { onclick: () => addressSheet(() => networkTab(body)) }, 'Change') : ''))),
         h('div.group-label', 'How it’s reached'),
         h('div.srv-card',
             ...(host.network || []).map(([k, v]) => row(k, v)),

@@ -9,6 +9,7 @@ import * as store from './prefs.js'
 import { tagChips, tagEditor, tagPage as tagPageImpl, libraryTagRow, episodeTagBar, hiddenFor, tagHref } from './tags.js'
 import { seerrSearch, notInCoveShelf, homeRequestsShelf } from './requests.js'
 import * as passkey from './passkey.js'
+import { pairRow } from './pair.js'
 import * as play from './playprefs.js'
 import { jellyfinUserGroup, pictureRow } from './jfuser.js'
 import { pinGate, pinRow, hasPins } from './pin.js'
@@ -867,6 +868,8 @@ export function settingsPage(main) {
         jellyfinUserGroup(),
         api.atLeast('admin') ? h('div.group-label', 'Family') : null,
         api.atLeast('admin') ? h('div.group', h('a.list-row', { href: '#/server' }, h('div', h('div', 'Server'), h('div.muted.small', 'Dashboard, users, devices')), icon('chevron'))) : null,
+        h('div.group-label', 'Cove apps'),
+        pairRow(),
         h('div.group-label', 'Face ID'),
         faceIdBox(),
         h('div.group-label', 'Approve a Device'),

@@ -1123,3 +1123,12 @@ kbd { display: inline-block; min-width: 24px; padding: 2px 7px; border-radius: 6
 .group-label.closed .collapse-chev { transform: rotate(-90deg); }
 @media (prefers-reduced-motion: reduce) { .collapse-chev { transition: none; } }
 #main [hidden] { display: none !important; }   /* collapsed sections: hidden wins over a card's own display */
+
+/* Connect an app (QR) */
+.pair { text-align: center; }
+.pair-qr { width: min(260px, 70vw); margin: 14px auto 12px; padding: 10px; background: #fff; border-radius: 16px; }
+.pair-qr svg { display: block; width: 100%; height: auto; }
+.pair-name { font-weight: 700; font-size: 18px; }
+.pair-url { margin: 2px 0 12px; overflow-wrap: anywhere; }
+.pair-actions { display: flex; justify-content: center; gap: 8px; }
+.pair-note { margin-top: 12px; }
