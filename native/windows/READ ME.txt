@@ -1,0 +1,12 @@
+Cove Server for Windows
+
+1. Double-click "Install Cove Server.cmd" and say Yes when Windows asks for permission.
+   Cove Server installs as a service (it starts with Windows, even before anyone signs in),
+   and a Cove icon appears by the clock.
+2. Your browser opens the setup page. Type the setup code it shows, then connect Jellyfin
+   (and Kavita and Seerr if you have them).
+3. Other devices at home open http://<this PC's name or address>:5050
+
+The Cove icon by the clock: Open Cove, Show setup code, Open data folder.
+Settings, keys and people are kept in C:\ProgramData\Cove Server (back this folder up).
+To update: run the new "Install Cove Server.cmd". To remove: "Uninstall Cove Server.cmd".

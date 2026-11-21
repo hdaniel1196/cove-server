@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cove Media privacy</title>
+<style>
+  :root { --bg: #0b0d14; --text: #f5f5f7; --text-2: rgba(235,235,245,.66); --accent: #5fd4e8; }
+  @media (prefers-color-scheme: light) { :root { --bg: #fbfbfd; --text: #1d1d1f; --text-2: #55555a; --accent: #0a7f93; } }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 56px 20px 80px; }
+  h1 { font-size: 34px; letter-spacing: -.02em; margin: 0 0 6px; }
+  h2 { font-size: 20px; margin: 34px 0 6px; }
+  p, li { color: var(--text-2); }
+  a { color: var(--accent); }
+  .date { color: var(--text-2); font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Cove Media privacy</h1>
+  <p class="date">Last updated November 20, 2026</p>
+
+  <p>Cove Media is a player for media servers you already run, like Jellyfin. It has no accounts of its own, no ads and no analytics.</p>
+
+  <h2>What Cove Media collects</h2>
+  <p>Nothing. The app does not send any information to its developer or to anyone else.</p>
+
+  <h2>Who the app talks to</h2>
+  <p>Only the server address you type in. Your sign-in, watch history, progress and settings go between your device and that server, the same as with the server's own apps. Whoever runs that server decides how that data is kept.</p>
+
+  <h2>What stays on your device</h2>
+  <p>The server address, your sign-in token (in the iOS and tvOS Keychain), and small settings like streaming quality and text size. Deleting the app removes them.</p>
+
+  <h2>Face ID</h2>
+  <p>On servers that support it, the app can sign you in with a passkey. Face ID happens on your device; your face data never leaves it and the app never sees it.</p>
+
+  <h2>Children</h2>
+  <p>The app collects nothing from anyone, including children. What a child can see is set by whoever runs the server.</p>
+
+  <h2>Questions</h2>
+  <p>Contact us through the feedback link in TestFlight or the App Store listing.</p>
+</main>
+</body>
+</html>

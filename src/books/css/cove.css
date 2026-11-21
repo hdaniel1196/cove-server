@@ -1,0 +1,111 @@
+
+:root {
+    --bg: #0d1220; --bg-2: #111827; --bg-elev: #182033; --bg-group: #151c2d;
+    --fill: rgba(255,255,255,.08); --fill-2: rgba(255,255,255,.14);
+    --text: #f5f5f7; --text-2: rgba(235,235,245,.62); --text-3: rgba(235,235,245,.34);
+    --sep: rgba(255,255,255,.1); --line: rgba(255,255,255,.08); --line-2: rgba(255,255,255,.14);
+    --accent: #5fd4e8; --accent-2: rgba(95,212,232,.16); --green: #30d158; --blue: #5fd4e8;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 22px rgba(0,0,0,.35);
+    --shadow-big: 0 2px 6px rgba(0,0,0,.5), 0 18px 44px rgba(0,0,0,.55);
+    --ease: cubic-bezier(.22, 1, .36, 1);
+    --font: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    color-scheme: dark;
+}
+html, body.cove { background: var(--bg); }
+body.cove {
+    background: radial-gradient(1200px 600px at 50% -200px, #18223a 0%, var(--bg) 60%) no-repeat, var(--bg);
+    font-family: var(--font); letter-spacing: -.01em;
+}
+body.cove button, body.cove input, body.cove select { font-family: inherit; }
+
+/* ---- shell: Cove's top bar on wide screens, Cove's tab bar on phones (no sidebar) */
+body.cove .sidebar { display: none !important; }
+body.cove .topbar { display: none; }
+body.cove .tabbar { background: rgba(18,18,20,.72); }
+body.cove .tab { color: var(--text-3); font-size: 10px; flex: 1; min-width: 0; }
+body.cove .tab.active { color: var(--text); }
+body.cove .tab .cove-ico { width: 26px; height: 26px; border-radius: 7px; }
+body.cove .tab:has(.cove-ico) { color: var(--text-2); }
+@media (min-width: 900px) {
+    body.cove { overflow: auto; }
+    body.cove #app { display: block; height: auto; }
+    body.cove #main { height: auto; overflow: visible; padding: calc(68px + 12px) 12px 56px; min-height: 100vh; }
+    body.cove .topbar {
+        position: fixed; inset: 0 0 auto 0; z-index: 30; height: 68px;
+        display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px;
+        padding: 0 24px; border-bottom: 1px solid transparent;
+        transition: background .25s var(--ease), border-color .25s var(--ease);
+    }
+    body.cove .topbar.scrolled { background: rgba(13,18,32,.74); -webkit-backdrop-filter: blur(22px) saturate(160%); backdrop-filter: blur(22px) saturate(160%); border-bottom-color: var(--line); }
+    body.cove .topbar .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; letter-spacing: -.02em; padding: 0; justify-self: start; }
+    body.cove .topbar .brand img { width: 28px; height: 28px; border-radius: 7px; }
+    body.cove .top-nav { display: flex; gap: 6px; padding: 4px; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid var(--line); }
+    body.cove .top-link { padding: 8px 18px; border-radius: 999px; font-size: 15px; font-weight: 500; color: var(--text-2); white-space: nowrap;
+        transition: background .16s var(--ease), color .16s var(--ease), transform .15s ease-out; }
+    body.cove .top-link:hover { color: var(--text); background: rgba(255,255,255,.06); }
+    body.cove .top-link.active { background: rgba(255,255,255,.9); color: #0d1220; }
+    body.cove .top-link:active { transform: scale(.97); }
+    body.cove .top-icons { justify-self: end; display: flex; gap: 6px; }
+    body.cove .top-ico { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; color: var(--text-2);
+        transition: background .16s var(--ease), color .16s var(--ease); }
+    body.cove .top-ico:hover, body.cove .top-ico.active { color: var(--text); background: rgba(255,255,255,.08); }
+    body.cove .top-ico .icon { width: 22px; height: 22px; }
+}
+
+/* ---- Cove switcher (Cove's js/switcher.js styles itself): top bar on wide screens, sticky top left on phones.
+   .back-cove / .phone-back > a are the fallback if the switcher can't load. */
+body.cove .phone-back { position: sticky; top: calc(var(--safe-t, 0px) + 8px); z-index: 25; margin: calc(var(--safe-t, 0px) + 8px) 0 0 14px; display: inline-block; }
+body.cove .phone-back > a { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px 6px 8px; border-radius: 999px; font-weight: 600;
+    background: rgba(24,32,51,.78); border: 1px solid var(--line-2); color: var(--text); }
+body.cove .phone-back > a .icon { width: 18px; height: 18px; }
+body.cove .brand-row { justify-self: start; }
+@media (min-width: 900px) {
+    body.cove .phone-back { display: none; }
+    body.cove .topbar .brand.back-cove { gap: 8px; padding: 6px 16px 6px 10px; border-radius: 999px; background: rgba(255,255,255,.07); border: 1px solid var(--line-2);
+        font-size: 17px; transition: background .16s var(--ease), transform .15s ease-out; }
+    body.cove .topbar .brand.back-cove:hover { background: rgba(255,255,255,.14); }
+    body.cove .topbar .brand.back-cove:active { transform: scale(.97); }
+    body.cove .topbar .brand.back-cove .icon { width: 18px; height: 18px; color: var(--text-2); }
+    body.cove .topbar .brand.back-cove img { width: 24px; height: 24px; border-radius: 6px; }
+}
+
+body.cove .page-head h1 { font-weight: 700; letter-spacing: -.03em; }
+body.cove .section-label, body.cove .side-label, body.cove .hero-kicker, body.cove .saga-kicker { letter-spacing: 0; text-transform: none; font-weight: 600; color: var(--text-2); }
+body.cove .shelf-head h2, body.cove .shelf-head h3 { font-weight: 700; letter-spacing: -.02em; }
+body.cove .link, body.cove a.link { color: var(--accent); }
+
+body.cove .hero-title, body.cove .detail-title, body.cove .saga-head h1 { font-family: var(--font); letter-spacing: -.025em; }
+body.cove .avatar { background: rgba(255,255,255,.1); border: 1px solid var(--line-2); color: var(--text); font-weight: 600; }
+
+/* ---- buttons: Cove's pills */
+body.cove .btn { border-radius: 999px; background: rgba(255,255,255,.1); border: 1px solid var(--line-2); color: var(--text);
+    transition: background .16s var(--ease), transform .15s ease-out; }
+body.cove .btn:hover { background: rgba(255,255,255,.16); }
+body.cove .btn:active { transform: scale(.97); }
+body.cove .btn.primary { background: #f5f5f7; color: #000; border-color: transparent; }
+body.cove .btn.primary:hover { background: #fff; }
+body.cove .btn.ghost { background: var(--fill); border-color: transparent; }
+body.cove .btn.ghost.on { color: var(--accent); }
+body.cove .chip { background: rgba(255,255,255,.07); border: 1px solid var(--line); }
+body.cove .chip.on { background: rgba(255,255,255,.9); color: #0d1220; border-color: transparent; }
+body.cove .seg { background: rgba(255,255,255,.07); border-radius: 999px; }
+body.cove .seg button { border-radius: 999px; }
+body.cove .seg button.on { background: rgba(255,255,255,.9); color: #0d1220; }
+body.cove .toggle.on, body.cove input[type=checkbox]:checked { accent-color: var(--accent); }
+
+/* ---- cards, covers, groups */
+body.cove .cover { border-radius: 10px; box-shadow: 0 0 0 1px var(--line), var(--shadow); }
+body.cove .tile, body.cove .series-tile { transition: transform .2s var(--ease); }
+@media (hover: hover) { body.cove .tile:hover, body.cove .series-tile:hover { transform: translateY(-3px); } }
+body.cove .hero { border-radius: 20px; border: 1px solid var(--line); overflow: hidden; }
+body.cove .up-next-card, body.cove .group, body.cove .saga-series, body.cove .series-info-bar { background: var(--bg-group); border: 1px solid var(--line); }
+body.cove .cover-progress, body.cove .hero-progress, body.cove .mini-bar, body.cove .saga-progress { accent-color: var(--accent); }
+
+/* ---- inputs, sheets, toast */
+body.cove .search-input, body.cove .text-input, body.cove .sort-select { background: rgba(255,255,255,.07); border: 1px solid var(--line); border-radius: 12px; color: var(--text); }
+body.cove .search-input:focus, body.cove .text-input:focus { border-color: var(--accent); }
+body.cove .sheet { background: #111827; border: 1px solid var(--line); }
+body.cove .sheet-backdrop { background: rgba(5,8,15,.55); }
+body.cove .toast { background: rgba(24,32,51,.96); color: var(--text); border: 1px solid var(--line-2); }
+
+@media (prefers-reduced-motion: reduce) { body.cove * { transition: none !important; } }

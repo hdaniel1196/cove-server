@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0d14">
+<title>Set up Cove</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg: #0b0d14; --card: #11141c; --card-2: #161a24; --line: rgba(255,255,255,.08); --line-2: rgba(255,255,255,.14);
+    --text: #f5f5f7; --muted: #8b93a7; --accent: #5fd4e8; --warn: #e5b454; --bad: #ff6b5e; --good: #5fe8a0;
+    --ease: cubic-bezier(.22, 1, .36, 1);
+    --font: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    --mono: "Geist Mono", ui-monospace, Menlo, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
+main { max-width: 560px; margin: 0 auto; padding: max(40px, env(safe-area-inset-top)) 16px 64px; }
+.brand { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+.tile { width: 44px; height: 44px; border-radius: 12px; background: var(--card); padding: 9px; border: 1px solid var(--line); }
+.tile svg { width: 100%; height: 100%; display: block; }
+.brand b { font-size: 22px; letter-spacing: -.01em; }
+.brand span { display: block; color: var(--muted); font-size: 13px; }
+.steps { display: flex; gap: 6px; margin: 0 0 20px; }
+.steps i { flex: 1; height: 3px; border-radius: 2px; background: var(--line-2); transition: background .3s var(--ease); }
+.steps i.on { background: var(--accent); }
+section { display: none; }
+section.on { display: block; animation: rise .35s var(--ease); }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { section.on { animation: none; } .steps i { transition: none; } }
+h1 { font-size: 26px; line-height: 1.2; letter-spacing: -.015em; margin: 0 0 8px; font-weight: 700; }
+p.lead { color: var(--muted); margin: 0 0 22px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 6px 16px; margin-bottom: 14px; }
+label { display: block; padding: 12px 0; border-bottom: 1px solid var(--line); }
+label:last-child { border-bottom: 0; }
+label > span { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+input { width: 100%; background: var(--card-2); border: 1px solid var(--line-2); color: var(--text); border-radius: 10px; padding: 11px 12px; font: inherit; }
+input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+input.code { font: 600 20px var(--mono); letter-spacing: .12em; text-transform: uppercase; text-align: center; }
+.hint { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
+.hint code, p code { font: 12.5px var(--mono); background: var(--card-2); padding: 1px 6px; border-radius: 6px; color: var(--text); }
+.row { display: flex; gap: 10px; align-items: center; margin-top: 18px; }
+button { font: 600 15px var(--font); border-radius: 999px; padding: 11px 20px; border: 1px solid var(--line-2); background: var(--card-2); color: var(--text); cursor: pointer;
+    transition: transform .12s var(--ease), background .2s var(--ease), opacity .2s; }
+button:active { transform: scale(.97); }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button.primary { background: var(--accent); color: #06212a; border-color: transparent; }
+button[disabled] { opacity: .5; cursor: default; transform: none; }
+button.link { background: none; border: 0; color: var(--muted); padding: 11px 8px; font-weight: 500; }
+.spacer { flex: 1; }
+.status { font-size: 13.5px; margin: 10px 2px 0; min-height: 20px; }
+.status.ok { color: var(--good); } .status.bad { color: var(--bad); } .status.wait { color: var(--muted); }
+.sum { display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; padding: 14px 0; font-size: 14px; }
+.sum dt { color: var(--muted); } .sum dd { margin: 0; overflow-wrap: anywhere; }
+.part { display: flex; align-items: center; gap: 10px; margin: 0 0 6px; font-weight: 600; }
+.part .tile { width: 30px; height: 30px; padding: 6px; border-radius: 9px; }
+.optional { font-size: 12px; font-weight: 500; color: var(--muted); border: 1px solid var(--line-2); border-radius: 999px; padding: 1px 8px; }
+</style>
+</head>
+<body>
+<main>
+    <div class="brand">
+        <div class="tile" id="mark-cove"></div>
+        <div><b>Cove Server</b><span id="ver">First-time setup</span></div>
+    </div>
+    <div class="steps" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- 1: setup code -->
+    <section data-step="0">
+        <h1>Welcome to Cove</h1>
+        <p class="lead">Let’s connect your servers. It takes about two minutes. First, prove this is your Cove Server: the setup code is in its log.</p>
+        <div class="card">
+            <label><span>Setup code</span><input id="code" class="code" autocomplete="off" spellcheck="false" maxlength="9" placeholder="XXXX-XXXX"></label>
+        </div>
+        <p class="hint" id="code-hint">It’s in the Cove Server log on the computer running it.</p>
+        <div class="status" id="s0" role="status"></div>
+        <div class="row"><span class="spacer"></span><button class="primary" id="b0">Continue</button></div>
+    </section>
+
+    <!-- 2: name + you -->
+    <section data-step="1">
+        <h1>Name it, and you</h1>
+        <p class="lead">This is what everyone sees in the app. You’re the owner: you decide who gets in and what they can see.</p>
+        <div class="card">
+            <label><span>Server name</span><input id="name" placeholder="The Smith House" maxlength="40"></label>
+            <label><span>Your email</span><input id="email" type="email" autocomplete="email" placeholder="you@example.com"></label>
+        </div>
+        <p class="hint">You’ll sign in to Cove with this email and your Jellyfin password.</p>
+        <div class="status" id="s1" role="status"></div>
+        <div class="row"><button class="link" data-back>Back</button><span class="spacer"></span><button class="primary" id="b1">Continue</button></div>
+    </section>
+
+    <!-- 3: Jellyfin -->
+    <section data-step="2">
+        <h1>Movies and shows</h1>
+        <p class="lead">Cove plays everything from your Jellyfin server. Sign in with the Jellyfin account that runs it.</p>
+        <div class="card">
+            <div class="part" style="padding-top:12px"><span class="tile" id="mark-reel"></span>Cinema · Jellyfin</div>
+            <label><span>Jellyfin address</span><input id="jf-url" inputmode="url" placeholder="http://192.168.1.20:8096" autocomplete="off"></label>
+            <label><span>Jellyfin admin user name</span><input id="jf-user" autocomplete="username"></label>
+            <label><span>Password</span><input id="jf-pass" type="password" autocomplete="current-password"></label>
+        </div>
+        <p class="hint"><span id="addr-hint">The address Jellyfin answers on, like http://192.168.1.20:8096.</span> Cove makes its own Jellyfin API key, so you don’t have to.</p>
+        <div class="status" id="s2" role="status"></div>
+        <div class="row"><button class="link" data-back>Back</button><span class="spacer"></span><button class="primary" id="b2">Check and continue</button></div>
+    </section>
+
+    <!-- 4: Kavita -->
+    <section data-step="3">
+        <h1>Books <span class="optional">optional</span></h1>
+        <p class="lead">Folio reads books, comics and manga from Kavita. Skip this if you don’t run Kavita. You can add it later.</p>
+        <div class="card">
+            <div class="part" style="padding-top:12px"><span class="tile" id="mark-folio"></span>Folio · Kavita</div>
+            <label><span>Kavita address</span><input id="kv-url" inputmode="url" placeholder="http://192.168.1.20:5000" autocomplete="off"></label>
+            <label><span>Kavita admin’s auth key</span><input id="kv-key" autocomplete="off" spellcheck="false"></label>
+        </div>
+        <p class="hint">In Kavita: your profile → 3rd Party Clients → Auth Keys (the OPDS key works).</p>
+        <div class="status" id="s3" role="status"></div>
+        <div class="row"><button class="link" data-back>Back</button><span class="spacer"></span><button class="link" id="skip3">Skip</button><button class="primary" id="b3">Check and continue</button></div>
+    </section>
+
+    <!-- 5: Seerr -->
+    <section data-step="4">
+        <h1>Requests <span class="optional">optional</span></h1>
+        <p class="lead">Let people ask for movies and shows. Cove uses Seerr (or Overseerr/Jellyseerr) for this. Skip it if you don’t run one.</p>
+        <div class="card">
+            <div class="part" style="padding-top:12px"><span class="tile" id="mark-requests"></span>Requests · Seerr</div>
+            <label><span>Seerr address</span><input id="sr-url" inputmode="url" placeholder="http://192.168.1.20:5055" autocomplete="off"></label>
+            <label><span>Seerr API key</span><input id="sr-key" autocomplete="off" spellcheck="false"></label>
+        </div>
+        <p class="hint">In Seerr: Settings → General → API Key.</p>
+        <div class="status" id="s4" role="status"></div>
+        <div class="row"><button class="link" data-back>Back</button><span class="spacer"></span><button class="link" id="skip4">Skip</button><button class="primary" id="b4">Check and continue</button></div>
+    </section>
+
+    <!-- 6: addresses + finish -->
+    <section data-step="5">
+        <h1>Where people find it</h1>
+        <p class="lead">The apps use these to reach Cove. The outside address is optional: without one, Cove works at home only.</p>
+        <div class="card">
+            <label><span>At home</span><input id="local" inputmode="url"></label>
+            <label><span>From outside (https) <span class="optional">optional</span></span><input id="public" inputmode="url" placeholder="https://cove.example.com"></label>
+        </div>
+        <p class="hint">For an outside address you need your own domain with HTTPS in front of Cove (a Cloudflare tunnel, Caddy, or Tailscale Funnel). Face ID sign-in turns on with it.</p>
+        <div class="card"><dl class="sum" id="sum"></dl></div>
+        <div class="status" id="s5" role="status"></div>
+        <div class="row"><button class="link" data-back>Back</button><span class="spacer"></span><button class="primary" id="b5">Finish setup</button></div>
+    </section>
+
+    <!-- done -->
+    <section data-step="6">
+        <h1>You’re all set</h1>
+        <p class="lead" id="done-text"></p>
+        <div class="row"><button class="primary" id="go">Open Cove</button></div>
+    </section>
+</main>
+<script type="module">
+const MARKS = {
+    cove: ['#5fd4e8', '<path d="M18.4 6.2A8.5 8.5 0 1 0 18.4 17.8"/><path d="M8.2 13.2c1.2-1 2.4-1 3.6 0s2.4 1 3.6 0"/>'],
+    reel: ['#5fd4e8', '<rect x="3.5" y="5" width="17" height="12" rx="2.5"/><path d="M10.5 8.8v4.4l3.6-2.2z"/><path d="M8.5 20h7"/>'],
+    folio: ['#ff9a5c', '<path d="M12 7.5c-2-1.6-4.8-2-8-1.5v12c3.2-.5 6 0 8 1.5"/><path d="M12 7.5c2-1.6 4.8-2 8-1.5v12c-3.2-.5-6 0-8 1.5"/><path d="M12 7.5v12"/>'],
+    requests: ['#e5b454', '<path d="M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v8a1.5 1.5 0 0 1-1.5 1.5h-7l-4 3.5v-3.5H5A1.5 1.5 0 0 1 3.5 15V7A1.5 1.5 0 0 1 5 5.5z"/><path d="M12 8.5v5M9.5 11h5"/>'],
+}
+for (const [k, [c, b]] of Object.entries(MARKS)) {
+    const el = document.getElementById('mark-' + k)
+    if (el) el.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${b}</svg>`
+}
+const $ = id => document.getElementById(id)
+const val = id => $(id).value.trim()
+const state = { books: null, requests: null }
+let step = 0
+
+function show(n) {
+    step = n
+    document.querySelectorAll('section').forEach(s => s.classList.toggle('on', +s.dataset.step === n))
+    document.querySelectorAll('.steps i').forEach((i, k) => i.classList.toggle('on', k <= n))
+    const f = document.querySelector(`section[data-step="${n}"] input`)
+    if (f && !f.value) f.focus()
+    if (n === 5) summary()
+}
+function say(n, text, kind = 'bad') { const s = $('s' + n); s.textContent = text; s.className = 'status ' + kind }
+async function post(path, body) {
+    const r = await fetch('/cove-api/setup/' + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: val('code'), ...body }) })
+    const j = await r.json().catch(() => ({}))
+    if (!r.ok) throw new Error(j.error || 'Something went wrong (' + r.status + ')')
+    return j
+}
+async function busy(btn, fn) {
+    btn.disabled = true
+    try { await fn() } finally { btn.disabled = false }
+}
+
+fetch('/cove-api/setup/status').then(r => r.json()).then(s => {
+    if (s.done) location.replace('/')
+    $('ver').textContent = 'First-time setup · version ' + s.version
+    const hint = {
+        docker: 'Run <code>docker logs cove-server</code> on the computer running Cove, or open the container’s log in Docker Desktop.',
+        windows: 'Click the Cove icon by the clock, then <b>Show setup code</b>. The installer window shows it too.',
+        mac: 'Click the Cove icon in the menu bar, then <b>Show setup code</b>.',
+        linux: 'It’s printed in the Cove Server log when it starts.',
+    }[s.platform]
+    if (hint) $('code-hint').innerHTML = hint
+    $('addr-hint').innerHTML = s.platform === 'docker'
+        ? 'Use the address Cove can reach from inside Docker: the computer’s network address, or the container’s name if they share a Docker network. Not <code>localhost</code>.'
+        : 'If Jellyfin runs on this same computer, <code>http://localhost:8096</code> works. Otherwise use its network address, like http://192.168.1.20:8096.'
+}).catch(() => {})
+$('local').value = location.origin
+show(0)
+
+document.querySelectorAll('[data-back]').forEach(b => b.onclick = () => show(step - 1))
+document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); document.querySelector(`section[data-step="${step}"] .primary`)?.click() }
+})
+$('code').addEventListener('input', e => {
+    let v = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8)
+    if (v.length > 4) v = v.slice(0, 4) + '-' + v.slice(4)
+    e.target.value = v
+})
+
+$('b0').onclick = () => busy($('b0'), async () => {
+    if (val('code').length < 9) return say(0, 'Type all 8 characters of the setup code')
+    say(0, 'Checking…', 'wait')
+    try { await post('check', { kind: 'none', url: 'x' }) } catch (e) {
+        if (/setup code/i.test(e.message)) return say(0, e.message)
+    }
+    say(0, ''); show(1)
+})
+$('b1').onclick = () => {
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val('email'))) return say(1, 'Type your email, it’s how you’ll sign in')
+    if (!val('name')) $('name').value = 'Cove'
+    say(1, ''); show(2)
+}
+$('b2').onclick = () => busy($('b2'), async () => {
+    if (!val('jf-url') || !val('jf-user')) return say(2, 'Type the address and the admin user name')
+    say(2, 'Checking Jellyfin…', 'wait')
+    try {
+        const r = await post('check', { kind: 'jellyfin', url: val('jf-url'), user: val('jf-user'), password: $('jf-pass').value })
+        say(2, `Connected to ${r.name || 'Jellyfin'} ${r.version || ''} as ${r.user}`, 'ok')
+        setTimeout(() => show(3), 700)
+    } catch (e) { say(2, e.message) }
+})
+$('b3').onclick = () => busy($('b3'), async () => {
+    if (!val('kv-url') || !val('kv-key')) return say(3, 'Type the address and the key, or skip')
+    say(3, 'Checking Kavita…', 'wait')
+    try {
+        const r = await post('check', { kind: 'kavita', url: val('kv-url'), key: val('kv-key') })
+        state.books = { url: val('kv-url'), key: val('kv-key'), user: r.user }
+        say(3, `Connected to Kavita as ${r.user}`, 'ok'); setTimeout(() => show(4), 700)
+    } catch (e) { say(3, e.message) }
+})
+$('skip3').onclick = () => { state.books = null; say(3, ''); show(4) }
+$('b4').onclick = () => busy($('b4'), async () => {
+    if (!val('sr-url') || !val('sr-key')) return say(4, 'Type the address and the API key, or skip')
+    say(4, 'Checking Seerr…', 'wait')
+    try {
+        const r = await post('check', { kind: 'seerr', url: val('sr-url'), key: val('sr-key') })
+        state.requests = { url: val('sr-url'), key: val('sr-key') }
+        say(4, `Connected to Seerr ${r.version || ''}`, 'ok'); setTimeout(() => show(5), 700)
+    } catch (e) { say(4, e.message) }
+})
+$('skip4').onclick = () => { state.requests = null; say(4, ''); show(5) }
+
+function summary() {
+    const rows = [['Name', val('name') || 'Cove'], ['Owner', val('email')], ['Cinema', 'Jellyfin at ' + val('jf-url')],
+        ['Folio', state.books ? 'Kavita at ' + state.books.url : 'Off for now'], ['Requests', state.requests ? 'Seerr at ' + state.requests.url : 'Off for now']]
+    $('sum').replaceChildren(...rows.flatMap(([k, v]) => { const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = k; dd.textContent = v; return [dt, dd] }))
+}
+$('b5').onclick = () => busy($('b5'), async () => {
+    const pub = val('public')
+    if (pub && !/^https:\/\//i.test(pub)) return say(5, 'The outside address has to start with https://')
+    say(5, 'Setting up Cove…', 'wait')
+    try {
+        const r = await post('finish', {
+            name: val('name') || 'Cove', email: val('email'), localUrl: val('local'), publicUrl: pub,
+            jellyfin: { url: val('jf-url'), user: val('jf-user'), password: $('jf-pass').value },
+            kavita: state.books ? { url: state.books.url, key: state.books.key } : null,
+            seerr: state.requests ? { url: state.requests.url, key: state.requests.key } : null,
+        })
+        $('jf-pass').value = ''
+        $('done-text').textContent = `${val('name') || 'Cove'} is ready. Sign in with ${r.email} and your Jellyfin password, then add your family under Server → Users.`
+        show(6)
+    } catch (e) { say(5, e.message) }
+})
+$('go').onclick = () => setTimeout(() => location.replace('/'), 400)   // cove-api restarts with the new settings
+</script>
+</body>
+</html>

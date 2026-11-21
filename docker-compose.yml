@@ -1,0 +1,25 @@
+# Cove Server: example for a new install (see INSTALL.md).
+#   docker compose up -d
+#   docker logs cove-server        <- the setup code is here
+#   then open http://<this computer>:5050 and follow the setup page
+services:
+  cove-server:
+    image: cove-server:latest
+    container_name: cove-server
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      - TZ=America/Chicago            # your time zone
+    volumes:
+      - ./data:/data                  # settings, keys, people; back this folder up
+    # Optional: lets members edit the sagas they made (Cove reads who owns each Jellyfin playlist). Direct it at
+    # Jellyfin's own config folder, data/playlists inside it.
+    #  - /path/to/jellyfin/config/data/playlists:/jfplaylists:ro
+    networks: [cove]
+
+networks:
+  cove:
+    ipam:
+      config:
+        - subnet: 10.89.0.0/24        # its own small range, never one that overlaps your home network

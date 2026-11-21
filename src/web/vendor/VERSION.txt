@@ -1,0 +1,1 @@
+hls.js 1.5.17 (Apache-2.0) from cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js, used only where the browser has no native HLS (Chrome/Edge on a PC). Safari uses its own.
