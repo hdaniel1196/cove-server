@@ -37,7 +37,7 @@ Save this as `docker-compose.yml` in a new folder, then run `docker compose up -
 ```yaml
 services:
   cove-server:
-    image: cove-server:latest
+    image: ghcr.io/hdaniel1196/cove-server:latest
     container_name: cove-server
     restart: unless-stopped
     ports:
@@ -95,6 +95,6 @@ Then put that https address in Cove's settings. Face ID sign-in turns on with it
 ## Good to know
 
 - **Back up the `data` folder.** It holds the settings, Cove's keys and your people.
-- **Updating:** pull the new image, then `docker compose up -d`. Settings stay in `data`.
+- **Updating:** `docker compose pull`, then `docker compose up -d`. Settings stay in `data`.
 - **The network range:** Docker can hand a new network a 192.168.x range that clashes with your home network, and then Cove can't reach Jellyfin. The `subnet` line in the compose file prevents that.
 - **Members editing their own sagas (optional):** mount Jellyfin's `config/data/playlists` folder read-only at `/jfplaylists`. Without it, only admins edit sagas.

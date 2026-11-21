@@ -4,7 +4,7 @@
 #   then open http://<this computer>:5050 and follow the setup page
 services:
   cove-server:
-    image: cove-server:latest
+    image: ghcr.io/hdaniel1196/cove-server:latest
     container_name: cove-server
     restart: unless-stopped
     ports:
