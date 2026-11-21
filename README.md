@@ -98,3 +98,7 @@ Then put that https address in Cove's settings. Face ID sign-in turns on with it
 - **Updating:** pull the new image, then `docker compose up -d`. Settings stay in `data`.
 - **The network range:** Docker can hand a new network a 192.168.x range that clashes with your home network, and then Cove can't reach Jellyfin. The `subnet` line in the compose file prevents that.
 - **Members editing their own sagas (optional):** mount Jellyfin's `config/data/playlists` folder read-only at `/jfplaylists`. Without it, only admins edit sagas.
+
+## License
+
+Cove Server is MIT licensed (see LICENSE). It bundles [hls.js](https://github.com/video-dev/hls.js) (Apache 2.0) and [foliate-js](https://github.com/johnfactotum/foliate-js) (MIT), each under its own license. Jellyfin, Kavita and Seerr are separate projects; Cove talks to them, it doesn't include them.
