@@ -834,7 +834,7 @@ function deviceGroup(main) {
         devSel('cove.quality', 'Streaming quality', 'Lower it on a slow connection. The server converts to fit.',
             [['', 'Best available'], ['40000000', '40 Mbps (4K)'], ['20000000', '20 Mbps (1080p high)'], ['10000000', '10 Mbps (1080p)'], ['6000000', '6 Mbps (720p)'], ['3000000', '3 Mbps (cellular)'], ['1500000', '1.5 Mbps (weak signal)']]),
         devSel('cove.textsize', 'Text and button size', 'Bigger for a TV across the room', [['normal', 'Normal'], ['large', 'Large'], ['xl', 'Extra large'], ['tv', 'TV across the room']], () => applyTextSize()),
-        devSel('cove.convert', 'Always convert', 'Only for a device that has trouble with a file. Uses the 4090.', [['off', 'Off'], ['on', 'On']]),
+        devSel('cove.convert', 'Always convert', 'Only for a device that has trouble with a file. Uses ' + api.gpuLabel() + '.', [['off', 'Off'], ['on', 'On']]),
         h('button.list-row', { onclick: () => keysSheet() }, h('div', h('div', 'Keyboard shortcuts'), h('div.muted.small', 'Or press ? anywhere')), icon('chevron')))
 }
 

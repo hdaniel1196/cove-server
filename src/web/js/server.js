@@ -59,6 +59,9 @@ async function dashboard(body) {
     timer = setInterval(() => { if (document.visibilityState === 'visible') refresh() }, 10_000)
 }
 const row = (k, v) => h('div.srv-row', h('span.muted', k), h('span', v))
+// Jellyfin's hardware acceleration kinds, by name (the Transcoding tab shows what this server really uses)
+const accelName = t => ({ nvenc: 'NVIDIA NVENC', qsv: 'Intel Quick Sync', vaapi: 'VA-API', videotoolbox: 'Apple VideoToolbox', amf: 'AMD AMF',
+    v4l2m2m: 'Video4Linux', rkmpp: 'Rockchip MPP', none: 'No hardware acceleration' })[t || 'none'] || t
 const addrRows = (host, full) => [
     host.addresses?.local ? row('At home', host.addresses.local) : '',
     host.addresses?.public ? row(full ? 'Away (Cove)' : 'Away', host.addresses.public) : '',
@@ -73,7 +76,7 @@ function drawNow(box, sessions) {
         const pct = it.RunTimeTicks ? Math.min(100, (ps.PositionTicks || 0) / it.RunTimeTicks * 100) : 0
         const title = it.SeriesName ? `${it.SeriesName} · ${it.ParentIndexNumber != null ? `S${it.ParentIndexNumber} E${it.IndexNumber}` : it.Name}` : it.Name
         const tc = s.TranscodingInfo
-        const how = ps.PlayMethod === 'Transcode' ? (tc && tc.IsVideoDirect ? 'Remux' : 'Converting on the 4090') : 'Direct play'
+        const how = ps.PlayMethod === 'Transcode' ? (tc && tc.IsVideoDirect ? 'Remux' : 'Converting on ' + api.gpuLabel()) : 'Direct play'
         const art = api.img(it, 'Primary', { w: 120 })
         return h('div.srv-play',
             art ? h('img.srv-poster', { src: art, alt: '', loading: 'lazy' }) : h('div.srv-poster'),
@@ -198,7 +201,7 @@ async function userPage(body, email) {
             sw('EnableMediaPlayback', 'Allow playback'),
             sw('EnablePlaybackRemuxing', 'Allow changing the file type', 'Remux: video copied untouched, no quality loss'),
             sw('EnableAudioPlaybackTranscoding', 'Allow converting audio'),
-            sw('EnableVideoPlaybackTranscoding', 'Allow converting video', 'On the 4090, when a device can’t play the file'),
+            sw('EnableVideoPlaybackTranscoding', 'Allow converting video', 'On ' + api.gpuLabel() + ', when a device can’t play the file'),
             sw('ForceRemoteSourceTranscoding', 'Always convert away from home'),
             num('MaxActiveSessions', 'Streams at once', { zero: 'Unlimited' }),
             num('RemoteClientBitrateLimit', 'Quality limit away from home', { scale: 1_000_000, unit: 'Mbps' })),
@@ -392,6 +395,7 @@ async function transcodingTab(body) {
         await api.request('/System/Configuration/encoding', { method: 'POST', body: { ...o, ...keep } })
     })
     const dec = h('div.srv-folders')
+    const gpu = api.gpuLabel()
     const drawDec = () => dec.replaceChildren(...CODECS.map(([c, n]) => {
         const on = (o.HardwareDecodingCodecs || []).includes(c)
         return h('button.srv-check' + (on ? '.on' : ''), { onclick: () => { const s = new Set(o.HardwareDecodingCodecs || []); on ? s.delete(c) : s.add(c); o.HardwareDecodingCodecs = [...s]; show(); drawDec() } }, h('span.srv-box', on ? icon('check') : null), n)
@@ -400,9 +404,10 @@ async function transcodingTab(body) {
     body.replaceChildren(
         h('div.group-label', 'Hardware'),
         h('div.group',
-            h('div.list-row', h('div', h('div', 'NVIDIA NVENC on the RTX 4090'), h('div.muted.small', 'Locked: it’s the only kind that works in this Docker setup')), icon('check')),
-            h('div.list-row.srv-sw', h('div', h('div', 'Decode on the 4090'), h('div.muted.small', 'Video types the graphics card reads'))), dec,
-            swRow(o, 'EnableHardwareEncoding', 'Encode on the 4090', null, show),
+            h('div.list-row', h('div', h('div', accelName(o.HardwareAccelerationType) + (host.gpuName ? ' on the ' + host.gpuName : '')),
+                h('div.muted.small', host.hwNote || 'Change the kind in Jellyfin’s own dashboard (Playback → Transcoding)')), icon('check')),
+            h('div.list-row.srv-sw', h('div', h('div', 'Decode on ' + gpu), h('div.muted.small', 'Video types the graphics card reads'))), dec,
+            swRow(o, 'EnableHardwareEncoding', 'Encode on ' + gpu, null, show),
             swRow(o, 'EnableEnhancedNvdecDecoder', 'Enhanced NVDEC decoder', null, show),
             swRow(o, 'EnableDecodingColorDepth10Hevc', '10-bit HEVC decoding', null, show),
             swRow(o, 'EnableDecodingColorDepth10Vp9', '10-bit VP9 decoding', null, show),
@@ -419,7 +424,7 @@ async function transcodingTab(body) {
             swRow(o, 'EnableSubtitleExtraction', 'Pull text subtitles out on the fly', null, show)),
         h('div.group-label', 'Tone mapping (HDR to SDR)'),
         h('div.group',
-            swRow(o, 'EnableTonemapping', 'Tone mapping on the 4090', 'Uses CUDA; the other methods don’t work in Docker', show),
+            swRow(o, 'EnableTonemapping', 'Tone mapping on ' + api.gpuLabel(), host.toneNote || null, show),
             selectRow(o, 'TonemappingAlgorithm', 'Method', [['bt2390', 'BT.2390 (Jellyfin’s pick)'], ['hable', 'Hable'], ['mobius', 'Mobius (your Emby pick)'], ['reinhard', 'Reinhard'], ['clip', 'Clip'], ['linear', 'Linear'], ['none', 'None']], null, show),
             selectRow(o, 'TonemappingRange', 'Range', [['auto', 'Auto'], ['tv', 'TV'], ['pc', 'PC']], null, show),
             numRow(o, 'TonemappingPeak', 'Peak brightness', 'nits', show),
@@ -703,7 +708,7 @@ async function liveTvTab(body) {
         h('div.group-label', 'Tuner settings'),
         tuner ? h('div.group',
             h('div.list-row', h('div', h('div', tuner.FriendlyName || 'Tuner'), h('div.muted.small', `${tuner.Url} · ${tuner.TunerCount} tuners · ${items.length} channels`))),
-            swRow(tuner, 'AllowHWTranscoding', 'Convert on the 4090 when needed', 'Antenna video is MPEG-2, so browsers always need this', show),
+            swRow(tuner, 'AllowHWTranscoding', 'Convert on ' + api.gpuLabel() + ' when needed', 'Antenna video is MPEG-2, so browsers always need this', show),
             swRow(tuner, 'AllowStreamSharing', 'Share a tuner', 'Two people on the same channel use one tuner', show),
             swRow(tuner, 'ImportFavoritesOnly', 'Only the HDHomeRun’s favorite channels', 'Favorites are set in the HDHomeRun app', show),
             swRow(tuner, 'IgnoreDts', 'Ignore broadcast timestamps', 'Helps with stutter on some stations', show),
@@ -865,8 +870,8 @@ async function playbackTab(body) {
         h('div.group-label', 'Scrub previews (trickplay)'),
         h('div.group',
             h('div.list-row', h('div', h('div', 'Turned on per library'), h('div.muted.small', 'Libraries → a library → Preview pictures while scrubbing')), h('a.pill.glass.small', { href: '#/server/libraries' }, 'Libraries')),
-            swRow(T, 'EnableHwAcceleration', 'Decode on the 4090', null, show),
-            swRow(T, 'EnableHwEncoding', 'Make the pictures on the 4090', null, show),
+            swRow(T, 'EnableHwAcceleration', 'Decode on ' + api.gpuLabel(), null, show),
+            swRow(T, 'EnableHwEncoding', 'Make the pictures on ' + api.gpuLabel(), null, show),
             swRow(T, 'EnableKeyFrameOnlyExtraction', 'Key frames only', 'Much faster, a little less exact', show),
             selectRow(T, 'ScanBehavior', 'During library scans', [['NonBlocking', 'Keep scanning, make them after'], ['Blocking', 'Wait for them']], null, show),
             selectRow(T, 'ProcessPriority', 'Priority', [['Idle', 'Idle'], ['BelowNormal', 'Below normal'], ['Normal', 'Normal'], ['AboveNormal', 'Above normal'], ['High', 'High']], null, show),

@@ -77,6 +77,7 @@ export const ownerName = () => auth?.owner || 'the owner'
 let infoCache = null
 try { infoCache = JSON.parse(localStorage.getItem('cove.serverinfo')) } catch {}
 export const cachedServerInfo = () => infoCache || {}
+export const gpuLabel = () => cachedServerInfo().gpu ? 'the ' + cachedServerInfo().gpu : 'the graphics card'
 export async function serverInfo() {
     try {
         const r = await fetch('/cove-api/server-info')

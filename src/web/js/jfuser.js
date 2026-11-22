@@ -49,7 +49,7 @@ export function jellyfinUserGroup() {
         const c = me.Configuration
         const libs = views.filter(v => v.CollectionType !== 'playlists')
         g.replaceChildren(
-            h('div.ss-row', h('div.muted.small', 'These are Jellyfin’s own settings for you. They change Jellyfin’s apps (and the TV at work); Cove follows its own settings above where they overlap.')),
+            h('div.ss-row', h('div.muted.small', 'These are Jellyfin’s own settings for you. They change Jellyfin’s own apps; Cove follows its own settings above where they overlap.')),
             pick(c, 'SubtitleMode', 'Subtitles in Jellyfin’s apps', [['Default', 'Default (as the file says)'], ['Smart', 'Smart'], ['OnlyForced', 'Forced only'], ['Always', 'Always'], ['None', 'None']]),
             pick(c, 'SubtitleLanguagePreference', 'Subtitle language', [['', 'Any'], ['eng', 'English'], ['spa', 'Spanish'], ['jpn', 'Japanese'], ['zho', 'Chinese'], ['kor', 'Korean'], ['fre', 'French']]),
             sw(c, 'RememberAudioSelections', 'Remember my audio pick', 'Per show, for the next episodes'),

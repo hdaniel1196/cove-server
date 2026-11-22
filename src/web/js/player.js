@@ -90,7 +90,7 @@ function describe(src, profile, audioIndex) {
 function verdict({ videoCopy, audioCopy, reasons, what, audioName, hw }) {
     const why = reasons.map(r => REASONS[r] || r).filter(Boolean)
     const because = why.length ? ' because ' + why.join(', ') : ''
-    if (!videoCopy) return { mode: 'transcode', label: hw ? 'Converting on the 4090' : 'Converting video', detail: 'The server re-encodes the video' + because + '.', what }
+    if (!videoCopy) return { mode: 'transcode', label: hw ? 'Converting on ' + api.gpuLabel() : 'Converting video', detail: 'The server re-encodes the video' + because + '.', what }
     if (!audioCopy) return { mode: 'remux', label: 'Remux, audio converted', detail: `The video is untouched. Only the audio (${audioName || 'this track'}) is converted for this device.`, what }
     return { mode: 'remux', label: 'Remux', detail: 'Same video and audio, just repackaged so this browser can stream it. No quality loss.', what }
 }
@@ -165,7 +165,6 @@ async function start(root, itemId, { fromStart, close, state, audioIndex, subInd
         query: { userId: api.userId() },
         body: {
             DeviceProfile: profile, StartTimeTicks: startTicks, AutoOpenLiveStream: true,
-            // antenna video is MPEG-2 (no browser plays it), so live TV is always converted on the 4090
             // "Always convert" (Settings → This device) is for troubleshooting a device that chokes on a file
             EnableDirectPlay: !live && !forceConvert(), EnableDirectStream: !live && !forceConvert(), EnableTranscoding: true,
             AllowVideoStreamCopy: !live && !forceConvert(), AllowAudioStreamCopy: !forceConvert(),

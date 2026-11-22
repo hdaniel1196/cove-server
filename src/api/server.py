@@ -167,6 +167,7 @@ def server_info():
             "signIn": {"password": True, "code": code, "faceId": bool(passkeys.RP_ID), "rpId": passkeys.RP_ID, "pin": True},
             "addresses": {"local": srv.get("localUrl"), "public": srv.get("publicUrl")},
             "reportsTo": srv.get("reportsTo") or None,
+            "gpu": (CONFIG.get("host") or {}).get("gpuName") or None,
             "minAppVersion": srv.get("minAppVersion", "0.1")}
 TYPES = {"Primary", "Logo", "Thumb", "Banner", "Disc", "Art", "Backdrop"}
 
