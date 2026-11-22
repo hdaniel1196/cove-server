@@ -343,6 +343,31 @@ def playlist_meta():
     return out
 
 
+SAGA_OWNERS_F = D("saga-owners.json")
+
+
+def saga_owners():
+    """{playlist id: owner user id} for sagas made through Cove (Nov 21, 2026: a fresh Cove Server has no access to
+    Jellyfin's playlist.xml files, so saga/edit couldn't tell who owned a saga it had just made)."""
+    try:
+        return json.load(open(SAGA_OWNERS_F, encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
+def remember_saga_owner(sid, uid):
+    o = saga_owners()
+    o[str(sid).replace("-", "").lower()] = str(uid).replace("-", "").lower()
+    tmp = SAGA_OWNERS_F + ".tmp"
+    json.dump(o, open(tmp, "w", encoding="utf-8"), indent=1)
+    os.replace(tmp, SAGA_OWNERS_F)
+
+
+def owner_of(sid, folder_meta):
+    """Owner from Jellyfin's playlist.xml when it's mounted, else from Cove's own note."""
+    return (folder_meta or {}).get("owner") or saga_owners().get(str(sid).replace("-", "").lower())
+
+
 _public_cache = {}
 
 
@@ -366,6 +391,7 @@ def saga_meta(sid):
     it = found[0]
     folder = os.path.basename((it.get("Path") or "").rstrip("/"))
     m = dict(playlist_meta().get(folder, {"owner": None}))
+    m["owner"] = owner_of(sid, m)
     m["public"] = saga_public(sid, m.get("owner"))
     return it, m
 
@@ -381,7 +407,7 @@ def saga_list(uid, role):
         if i.get("MediaType") not in (None, "Video", "Unknown"):
             continue
         m = meta.get(os.path.basename((i.get("Path") or "").rstrip("/")), {})
-        owner = m.get("owner")
+        owner = owner_of(i["Id"], m)
         mine = owner == uid
         m = {**m, "public": saga_public(i["Id"], owner)}
         if not (mine or m.get("public") or admin):
@@ -389,6 +415,14 @@ def saga_list(uid, role):
         out.append({"id": i["Id"], "name": i.get("Name"), "owner": {"id": owner, "name": names.get(owner, "?")}, "public": bool(m.get("public")),
                     "mine": mine, "canEdit": mine or admin, "count": i.get("ChildCount"), "created": i.get("DateCreated"),
                     "imageTags": i.get("ImageTags") or {}})
+    # Jellyfin only fills ChildCount when asked as a user: ask as each saga's owner (Nov 21, 2026; it was always empty)
+    for x in out:
+        if x["count"] is None and x["owner"]["id"]:
+            try:
+                got = jf("/Items", key_auth(), query={"ids": x["id"], "fields": "ChildCount", "userId": x["owner"]["id"]}).get("Items", [])
+                x["count"] = got[0].get("ChildCount") if got else None
+            except Exception:
+                pass
     return {"sagas": out, "canCreate": LEVELS.get(role, 2) >= LEVELS["member"], "canPublish": admin}
 
 
@@ -399,6 +433,8 @@ def saga_create(body, auth, uid, role):
     if not name:
         raise ValueError("Give it a name")
     r = jf("/Playlists", auth, "POST", body={"Name": name, "Ids": [str(x) for x in body.get("ids") or []], "UserId": uid, "MediaType": "Video", "IsPublic": False})   # Jellyfin defaults to public
+    if r.get("Id"):
+        remember_saga_owner(r["Id"], uid)
     return {"id": r.get("Id")}
 
 
@@ -413,7 +449,7 @@ def saga_edit(body, uid, role):
     if not (owner == uid or admin):
         raise PermissionError("Only the person who made it (or an admin) can change this saga")
     if not owner:
-        raise ValueError("Can't tell who owns this saga")
+        raise ValueError("This saga was made outside Cove, so Cove can't change it. Edit it in Jellyfin, or make a new saga in Cove.")
     a = owner_auth(owner)
     if op == "add":
         ids = [str(x) for x in body.get("ids") or []]
